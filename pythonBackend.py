@@ -20,10 +20,10 @@ epochs = 20 # the number of times you send the same data into the neural network
 batch_size = 10 # number o
 
 if K.image_data_format() == 'channels_first':
-    input_shape = (3, img_width, img_height)
+    input_shape = (3, img_height, img_width)
     print(input_shape)
 else:
-    input_shape = (img_width, img_height, 3) # 600, 300, 3
+    input_shape = (img_height, img_width, 3) 
     print(input_shape)
 
 
@@ -40,7 +40,7 @@ train_generator = train_datagen.flow_from_directory(
     batch_size=batch_size,
     directory=train_data_dir,
     shuffle=True,
-    target_size=(img_width, img_height),
+    target_size=(img_height, img_width),
     class_mode='categorical'
 )
 
@@ -48,7 +48,7 @@ label_map = (train_generator.class_indices)
 
 validation_generator = test_datagen.flow_from_directory(
     directory=validation_data_dir,
-    target_size=(img_width, img_height),
+    target_size=(img_height, img_width),
     shuffle=True,
     batch_size=batch_size,
     class_mode='categorical'
@@ -98,7 +98,7 @@ with open("model.json","w") as json_file:
 
 model.save_weights('first_try.h5')
 
-img_pred = image.load_img('tiger.jpg', target_size = (600,300))
+img_pred = image.load_img('tiger.png', target_size = (img_height,img_width))
 img_pred = image.img_to_array(img_pred)
 img_pred = np.expand_dims(img_pred, axis = 0)
 
