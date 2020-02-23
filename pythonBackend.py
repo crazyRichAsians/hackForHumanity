@@ -1,6 +1,6 @@
 # Description: This program classifies images
 from keras.preprocessing.image import ImageDataGenerator, load_img
-from keras.models import Sequential
+from keras.models import Sequential, model_from_json
 from keras.layers import Conv2D, MaxPooling2D
 from keras.layers import Activation, Dropout, Flatten, Dense
 from keras import backend as K
@@ -91,6 +91,10 @@ model.fit_generator(
     epochs=epochs,
     validation_data=validation_generator,
     validation_steps=nb_validation_samples // batch_size)
+
+model_json = model.to_json()
+with open("model.json","w") as json_file:
+    json_file.write(model_json)
 
 model.save_weights('first_try.h5')
 
