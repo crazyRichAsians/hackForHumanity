@@ -10,17 +10,17 @@ import numpy as np
 
 # dimensions of our image
 img_width, img_height = 600, 300
-
+labels = ['1st Degree', '3rd Degree']
 train_data_dir = 'trainingSet'
 validation_data_dir = 'validationSet'
 
-nb_train_samples = 90
-nv_validation_samples = 90
-epochs = 50 # the number of times you send the same data into the neural network again and again
-batch_size = 2 # number o
+nb_train_samples = 181
+nb_validation_samples = 21
+epochs = 20 # the number of times you send the same data into the neural network again and again
+batch_size = 10 # number o
 
 if K.image_data_format() == 'channels_first':
-    input_shape = (3, img_height, img_height)
+    input_shape = (3, img_width, img_height)
     print(input_shape)
 else:
     input_shape = (img_width, img_height, 3) # 600, 300, 3
@@ -41,25 +41,28 @@ train_generator = train_datagen.flow_from_directory(
     directory=train_data_dir,
     shuffle=True,
     target_size=(img_width, img_height),
-    class_mode='binary'
+    class_mode='categorical'
 )
 
+label_map = (train_generator.class_indices)
 
-validation_datagen = test_datagen.flow_from_directory(
+validation_generator = test_datagen.flow_from_directory(
     directory=validation_data_dir,
     target_size=(img_width, img_height),
     shuffle=True,
     batch_size=batch_size,
-    class_mode='binary'
+    class_mode='categorical'
 )
+
+label_map = (validation_generator.class_indices)
+
+print(label_map)
 
 ############################################## Create neural network
 model = Sequential()
 model.add(Conv2D(32, (3,3), input_shape=input_shape))
 model.add(Activation('relu')) # most common activation funciton in CNN
 model.add(MaxPooling2D(pool_size=(2,2))) #image that we have has to be reduced
-
-model.summary()
 
 model.add(Conv2D(32, (3,3)))
 model.add(Activation('relu'))
@@ -73,12 +76,12 @@ model.add(Flatten())
 model.add(Dense(64))
 model.add(Activation('relu'))
 model.add(Dropout(0.5)) #if you need it to be faster, try to dont use dropout
-model.add(Dense(1))
+model.add(Dense(2))
 model.add(Activation('sigmoid'))
 
 model.summary()
 
-model.compile(Loss='binary_crossentropy',
+model.compile(loss='binary_crossentropy',
                 optimizer='rmsprop',
                 metrics=['accuracy'])
 
@@ -91,15 +94,16 @@ model.fit_generator(
 
 model.save_weights('first_try.h5')
 
-img_pred = image.load_img('validationSet/', target_size = (600,300))
+img_pred = image.load_img('tiger.jpg', target_size = (600,300))
 img_pred = image.img_to_array(img_pred)
 img_pred = np.expand_dims(img_pred, axis = 0)
 
 result = model.predict(img_pred)
 print(result)
-if result[0][1] == 1:
-    prediction = "1st degree"
-else :
+
+if result[0][0] == 1:
     prediction = "3rd degree"
+else:
+    prediction = "1st degree"
 
 print(prediction)
